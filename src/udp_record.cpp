@@ -1,4 +1,9 @@
-﻿#include "lccl/socket.h"
+﻿#if defined(_MSC_VER)
+#else
+#include <unistd.h>
+#endif
+
+#include "lccl/socket.h"
 #include "lccl/oss/fmt.h"
 #include "udp_record.h"
 
@@ -114,7 +119,6 @@ bool UdpRecord::Init(const rapidjson::Value &param_val, std::string file_prefix)
 
     multiplex_->RegisterHandler(fd_, lccl::evt::EventTypes::kRead,
         std::bind(&UdpRecord::HandleCallback, this, std::placeholders::_1, std::placeholders::_2));
-
 
     std::string record_file_name = fmt::format("{}.data", param_->file_prefix);
     frecord_.open(record_file_name.c_str(), std::ios::binary);
