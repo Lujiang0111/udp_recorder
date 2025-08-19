@@ -154,6 +154,9 @@ void UdpRecord::Deinit()
     }
 
     param_ = nullptr;
+
+    // 最后加个换行
+    fmt::println("");
 }
 
 bool UdpRecord::ParseParam(const rapidjson::Value &param_val, std::string file_prefix)
@@ -219,6 +222,7 @@ void UdpRecord::Monitor()
             duration_ns / 1000000000,
             static_cast<double>(total_byte_) / 1000000,
             monitor_byte_ * 8 / 1000);
+        fflush(stdout);
         monitor_byte_ = 0;
     }
     prev_duration_div_ = duration_div;
