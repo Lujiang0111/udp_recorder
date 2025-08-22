@@ -14,6 +14,13 @@ class UdpRecord
 public:
     struct Param
     {
+        enum class Types
+        {
+            kUdp = 0,
+            kRtp,
+        };
+
+        Types type = Types::kUdp;
         std::string ip;
         uint16_t port;
         std::string itf;

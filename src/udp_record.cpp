@@ -7,6 +7,7 @@
 #include "lccl/oss/fmt.h"
 #include "udp_record.h"
 
+constexpr int kRtpHeaderLen = 12;
 constexpr int64_t kMonitorIntervalNs = 1000000000;
 
 UdpRecord::UdpRecord() :
@@ -162,6 +163,18 @@ void UdpRecord::Deinit()
 bool UdpRecord::ParseParam(const rapidjson::Value &param_val, std::string file_prefix)
 {
     param_ = std::make_shared<Param>();
+
+    std::string type_str;
+    lccl::GetJsonChild(param_val, "type", type_str);
+    if ("rtp" == type_str)
+    {
+        param_->type = Param::Types::kRtp;
+    }
+    else
+    {
+        param_->type = Param::Types::kUdp;
+    }
+
     if (!lccl::GetJsonChild(param_val, "ip", param_->ip))
     {
         fmt::println("Param ip not found");
@@ -191,7 +204,21 @@ void UdpRecord::HandleCallback(int fd, int triggered_events)
 
         if (len > 0)
         {
-            frecord_.write(reinterpret_cast<char *>(&recv_buffer_[0]), len);
+            switch (param_->type)
+            {
+            case Param::Types::kUdp:
+                frecord_.write(reinterpret_cast<char *>(&recv_buffer_[0]), len);
+                break;
+            case Param::Types::kRtp:
+                if (len > kRtpHeaderLen)
+                {
+                    frecord_.write(reinterpret_cast<char *>(&recv_buffer_[0]) + kRtpHeaderLen, len - kRtpHeaderLen);
+                }
+                break;
+            default:
+                break;
+            }
+            
             monitor_byte_ += len;
             total_byte_ += len;
         }
