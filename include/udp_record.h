@@ -14,13 +14,13 @@ class UdpRecord
 public:
     struct Param
     {
-        enum class Types
+        enum class InputTypes
         {
             kUdp = 0,
             kRtp,
         };
 
-        Types type = Types::kUdp;
+        InputTypes input_type = InputTypes::kUdp;
         std::string ip;
         uint16_t port;
         std::string itf;

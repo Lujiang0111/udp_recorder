@@ -1,5 +1,6 @@
 {
-    "type": "udp",
+    "record_time": 0,
+    "input_type": "udp",
     "ip": "192.165.52.58",
     "port": 33000,
     "interface": "192.165.52.58"

@@ -164,15 +164,15 @@ bool UdpRecord::ParseParam(const rapidjson::Value &param_val, std::string file_p
 {
     param_ = std::make_shared<Param>();
 
-    std::string type_str;
-    lccl::GetJsonChild(param_val, "type", type_str);
-    if ("rtp" == type_str)
+    std::string str_val;
+    lccl::GetJsonChild(param_val, "input_type", str_val);
+    if ("rtp" == str_val)
     {
-        param_->type = Param::Types::kRtp;
+        param_->input_type = Param::InputTypes::kRtp;
     }
     else
     {
-        param_->type = Param::Types::kUdp;
+        param_->input_type = Param::InputTypes::kUdp;
     }
 
     if (!lccl::GetJsonChild(param_val, "ip", param_->ip))
@@ -204,12 +204,12 @@ void UdpRecord::HandleCallback(int fd, int triggered_events)
 
         if (len > 0)
         {
-            switch (param_->type)
+            switch (param_->input_type)
             {
-            case Param::Types::kUdp:
+            case Param::InputTypes::kUdp:
                 frecord_.write(reinterpret_cast<char *>(&recv_buffer_[0]), len);
                 break;
-            case Param::Types::kRtp:
+            case Param::InputTypes::kRtp:
                 if (len > kRtpHeaderLen)
                 {
                     frecord_.write(reinterpret_cast<char *>(&recv_buffer_[0]) + kRtpHeaderLen, len - kRtpHeaderLen);

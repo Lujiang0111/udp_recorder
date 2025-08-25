@@ -14,7 +14,7 @@ struct Param
     std::string config_name = "config.json";
 };
 
-bool app_running = true;
+static bool app_running = true;
 
 static void SigIntHandler(int sig_num)
 {
@@ -64,7 +64,12 @@ int main(int argc, char **argv)
     config_json = buffer.str();
 
     rapidjson::Document config_doc;
-    lccl::ParseStringToJson(config_doc, config_json);
+    if (!lccl::ParseStringToJson(config_doc, config_json))
+    {
+        return 0;
+    }
+    int64_t record_time = 0;
+    lccl::GetJsonChild(config_doc, "record_time", record_time);
 
     std::shared_ptr<PcapRecord> pcap_record = std::make_shared<PcapRecord>();
     if (!pcap_record->Init(config_doc))
@@ -78,9 +83,12 @@ int main(int argc, char **argv)
         return 0;
     }
 
-    while (app_running)
+    auto curr_time = std::chrono::steady_clock::now();
+    auto end_time = curr_time + std::chrono::seconds(record_time);
+    while ((app_running) && ((record_time <= 0) || (curr_time < end_time)))
     {
-        std::this_thread::sleep_for(std::chrono::seconds(1));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        curr_time = std::chrono::steady_clock::now();
     }
 
     udp_record = nullptr;
